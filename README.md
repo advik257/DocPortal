@@ -7,3 +7,5 @@ push the files
 
 ### Embedding model openai,huggingface,gemini
 ### Vector database- inmemory , ondisk,cloudbased
+
+### Google AI Studio for Gemini key
