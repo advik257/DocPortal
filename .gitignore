@@ -12,3 +12,5 @@ __pycache__/
 *.log
 data/
 test.py
+logs/
+logs/*.log

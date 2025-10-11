@@ -25,6 +25,6 @@ class CustomLogger:
 if __name__ == "__main__":
     logger =CustomLogger()
     logger= logger.get_logger(__file__)
-    logger.info("This is an info message")
+    #logger.info("This is an info message")
             
     
