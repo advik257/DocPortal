@@ -10,4 +10,5 @@ transformers
 sentence-transformers
 structlog
 PyMuPDF
+pyyaml
 -e.
