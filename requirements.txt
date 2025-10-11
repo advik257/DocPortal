@@ -8,4 +8,6 @@ pypdf
 faiss-cpu
 transformers 
 sentence-transformers
+structlog
+PyMuPDF
 -e.

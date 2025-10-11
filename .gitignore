@@ -2,3 +2,13 @@
 venv
 .env
 documentportal.egg-info
+venv/
+__pycache__/
+.ipynb_checkpoints
+*.pyc
+.DS_Store
+.idea/
+.vscode/
+*.log
+data/
+test.py
