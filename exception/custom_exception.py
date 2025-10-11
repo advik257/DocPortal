@@ -17,12 +17,14 @@ class DocumentPortalException(Exception):
       
         
     def __str__(self):
-        return f"""
-               Error occurred in script: [{self.filename}]
-               at line number: [{self.lineno}]
-               with message: {self.error_message}\nTraceback:\n{self.traceback_str}
-               Traceback: {self.traceback_str}"""
-    
+        return (
+                f"""Error occurred in script: [{self.filename}]
+                    at line number: [{self.lineno}]
+                    with message: {self.error_message}
+                    Traceback:{self.traceback_str}
+                    """
+        )
+
 
 if __name__ == "__main__":
     try:
