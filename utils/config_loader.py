@@ -8,4 +8,4 @@ def load_config(config_path: str = "config/config.yaml") -> dict:
     return config
 
 
-load_config("config/config.yaml")
+#load_config("config/config.yaml")

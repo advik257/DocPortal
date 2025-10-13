@@ -4,7 +4,7 @@ faiss_db:
 
 embedding_model:
   provider: "sentence-transformers"
-  model_name: "sentence-transformers/all-MiniLM-L6-v2"
+  embedding_model_name: "sentence-transformers/all-MiniLM-L6-v2"
 
 retriever:
   top_k: 10
