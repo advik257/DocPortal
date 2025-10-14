@@ -95,6 +95,8 @@ if __name__ == "__main__":
     # Test loading embeddings
     embeddings = model_loader.load_embeddings()
     print(f"Embeddings model loaded:", embeddings)
+    embedresult = embeddings.embed_query("Hello, how are you?")
+    print(f"Embeddings result:", embedresult)
     
     #Test Model loading
     llm = model_loader.load_llm()

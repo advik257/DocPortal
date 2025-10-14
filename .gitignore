@@ -14,3 +14,5 @@ data/
 test.py
 logs/
 logs/*.log
+document_analysis.db
+.pdf
