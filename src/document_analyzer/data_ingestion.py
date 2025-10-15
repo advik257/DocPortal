@@ -72,7 +72,7 @@ if __name__ == "__main__":
     from io import BytesIO
     
     #handler = DocumentHandler()
-    pdf_path =r"E:\\LLMProjects\\documentportal\\data\\document_analysis\\NIPS-2017-attention-is-all-you-need-Paper.pdf"
+    pdf_path =r"E:\\LLMProjects\\documentportal\\data\\document_analysis\\sample.pdf"
     
     class Dummy_file:
         def __init__(self, file_path):
