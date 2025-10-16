@@ -16,3 +16,4 @@ logs/
 logs/*.log
 document_analysis.db
 .pdf
+test.py

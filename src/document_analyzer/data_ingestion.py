@@ -4,6 +4,9 @@ import fitz
 import uuid # data versioning
 from datetime import datetime
 
+#from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
@@ -53,13 +56,20 @@ class DocumentHandler:
     
     def read_pdf(self,pdf_path:str)->str:
         try:
-            text_chunks = []
-            with fitz.open(pdf_path) as doc:
-                for page_num , page in enumerate(doc, start=1):
-                    text_chunks.append(f"\n --- Page {page_num} ---\n {page.get_text()}")
-                text = "\n".join(text_chunks)
-                self.log.info("PDF read successfully.", file=pdf_path, total_pages=len(doc), total_chars=len(text))
-            return text
+            # text_chunks = []
+            # with fitz.open(pdf_path) as doc:
+            #     for page_num , page in enumerate(doc, start=1):
+            #         text_chunks.append(f"\n --- Page {page_num} ---\n {page.get_text()}")
+            #     text = "\n".join(text_chunks)
+            #     self.log.info("PDF read successfully.", file=pdf_path, total_pages=len(doc), total_chars=len(text))
+            # return text
+            loader = PyPDFLoader(pdf_path)
+            documents = loader.load()
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=50 , length_function=len)
+            text = text_splitter.split_documents(documents)
+            combined_text = "\n".join([doc.page_content for doc in text])
+            self.log.info("PDF read and split successfully.", file=pdf_path, total_pages=len(documents), total_chars=len(combined_text), total_chunks=len(text))
+            return combined_text
             
         except Exception as e:
             self.log.error("Error reading PDF:", error=str(e))

@@ -7,7 +7,7 @@ prompt = ChatPromptTemplate.from_template("""
                                           your highly intelligent AI assistant helps trained to analyze and summarize documents.
                                           return only valid json matching the exact schema provided.
                                           
-                                          {fromat_instructions}
+                                          {format_instructions}
                                           
                                           Analyze this document
                                           
