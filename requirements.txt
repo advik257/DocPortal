@@ -11,4 +11,5 @@ sentence-transformers
 structlog
 PyMuPDF
 pyyaml
+pandas
 -e.
