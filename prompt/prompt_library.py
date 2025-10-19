@@ -16,10 +16,13 @@ document_analysis_prompt = ChatPromptTemplate.from_template("""
                                           """)
 
 document_comparison_prompt = ChatPromptTemplate.from_messages([
+    
+    
     SystemMessagePromptTemplate.from_template(
         """You are a professional document comparison expert. Your task is to analyze and compare documents, 
         providing output in a specific JSON format. Always ensure your response is valid JSON."""
     ),
+    
     HumanMessagePromptTemplate.from_template(
         """Compare these documents and provide a detailed analysis:
 

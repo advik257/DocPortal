@@ -21,13 +21,22 @@ from langchain_core.runnables import RunnablePassthrough
 class DocumentComparison(BaseModel):
     """Model for document comparison results"""
     title: str = Field(description="Title of the comparison")
+    
+    #- A list of strings describing what’s the same in both documents 
     similarities: List[str] = Field(description="List of similarities between documents")
+    
+    #A list of strings describing what’s different
     differences: List[str] = Field(description="List of differences between documents")
+    
+    #- Summaries of each document — could include key fields like date, customer name, total, etc.
     document1_summary: List[str] = Field(description="Summary of first document")
     document2_summary: List[str] = Field(description="Summary of second document")
+    
+    #A dictionary showing what’s unique in each document.
     unique_information: Dict[str, List[str]] = Field(description="Unique information in each document")
 
 class DocumentComparatorLLM:
+    
     def __init__(self):
         load_dotenv()
         self.log = CustomLogger().get_logger(__name__)
@@ -35,6 +44,7 @@ class DocumentComparatorLLM:
         self.llm = self.loader.load_llm()
         self.output_parser = PydanticOutputParser(pydantic_object=DocumentComparison)
         self.prompt = PROMPT_REGISTRY.get("document_comparison")
+        
         if self.prompt is None:
             raise ValueError("Document comparison prompt not found in registry")
         

@@ -9,6 +9,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class DOcumentIngestion:
+    
     def __init__(self,base_dir:str="data\\document_compare"):
         
         self.log = CustomLogger().get_logger(__name__)
