@@ -19,3 +19,4 @@ document_analysis.db
 test.py
 data/document_compare/*
 single_document_chat/tests/test_documents/*
+multi_doc_chat/tests/test_documents/*
