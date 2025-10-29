@@ -33,6 +33,52 @@ class DocumentHandler:
         except Exception as e:
             self.log.error("Error initializing DocumentHandler:", error=str(e))
             raise DocumentPortalException("Error initializing DocumentHandler:", e) from e
+    
+    def clean_old_sessions(self, keep_latest=3):
+        
+        """Clean up old session directories, keeping the specified number of latest sessions.
+        
+        Args:
+            keep_latest (int): Number of latest sessions to keep. Defaults to 3.
+        """
+        try:
+            if not os.path.exists(self.data_dir):
+                self.log.info("No sessions to clean - directory doesn't exist")
+                return
+
+            # Get all session directories
+            sessions = []
+            for item in os.listdir(self.data_dir):
+                item_path = os.path.join(self.data_dir, item)
+                if os.path.isdir(item_path) and item.startswith("session_"):
+                    sessions.append(item_path)
+
+            # Sort sessions by creation time (newest first)
+            sessions.sort(key=lambda x: os.path.getctime(x), reverse=True)
+
+            # Keep the specified number of latest sessions
+            sessions_to_delete = sessions[keep_latest:]
+            
+            # Delete old sessions
+            for session_path in sessions_to_delete:
+                try:
+                    for root, dirs, files in os.walk(session_path, topdown=False):
+                        for name in files:
+                            os.remove(os.path.join(root, name))
+                        for name in dirs:
+                            os.rmdir(os.path.join(root, name))
+                    os.rmdir(session_path)
+                    self.log.info("Deleted old session", session=session_path)
+                except Exception as e:
+                    self.log.error("Error deleting session", session=session_path, error=str(e))
+
+            self.log.info("Session cleanup completed", 
+                        kept_sessions=keep_latest, 
+                        deleted_sessions=len(sessions_to_delete))
+
+        except Exception as e:
+            self.log.error("Error cleaning old sessions", error=str(e))
+            raise DocumentPortalException("Error cleaning old sessions", sys) from e
         
         
     def save_pdf(self,uploaded_file):

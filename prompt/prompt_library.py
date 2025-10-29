@@ -1,7 +1,7 @@
 # Prepare prompt templates for various tasks
 
 from langchain.prompts import PromptTemplate
-from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate,MessagesPlaceholder
 
 document_analysis_prompt = ChatPromptTemplate.from_template("""
                                           your highly intelligent AI assistant helps trained to analyze and summarize documents.
@@ -40,7 +40,38 @@ Important:
     )
 ])
 
+# Prompt for answering based on context
+context_qa_prompt = ChatPromptTemplate.from_messages([
+    ("system", (
+        "You are an assistant designed to answer questions using the provided context. Rely only on the retrieved "
+        "information to form your response. If the answer is not found in the context, respond with 'I don't know.' "
+        "Keep your answer concise and no longer than three sentences.\n\n{context}"
+    )),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+
+# Prompt for contextual question rewriting
+contextualize_question_prompt = ChatPromptTemplate.from_messages([
+    ("system", (
+        "Given a conversation history and the most recent user query, rewrite the query as a standalone question "
+        "that makes sense without relying on the previous context. Do not provide an answer—only reformulate the "
+        "question if necessary; otherwise, return it unchanged."
+    )),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+
+
+
+
+# central dictionries to register prompt types
 PROMPT_REGISTRY = {
     "document_analysis": document_analysis_prompt,
-    "document_comparison": document_comparison_prompt
+    "document_comparison": document_comparison_prompt,
+    "contextulize_question" : contextualize_question_prompt,
+    "context_qa" : context_qa_prompt
 }
+
+

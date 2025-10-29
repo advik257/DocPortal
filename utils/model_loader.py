@@ -6,7 +6,8 @@ from utils.config_loader import load_config
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
-from langchain_community.embeddings import HuggingFaceEmbeddings 
+#from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 #from langchain.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import SentenceTransformer
 from langchain_groq import ChatGroq
@@ -40,7 +41,10 @@ class ModelLoader:
         try:
             log.info("Loading embeddings model...")
             model_name =self.config["embedding_model"]["embedding_model_name"]
+            log.info("Loading embeddings model returning...")
             return HuggingFaceEmbeddings(model_name=model_name)
+             
+        
         except Exception as e:
             log.error("Error loading embeddings model:", error = str(e))
             raise DocumentPortalException("Failed to Load Embedding model", sys)

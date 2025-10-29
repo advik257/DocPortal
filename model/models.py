@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, RootModel
 from typing import Optional, List, Dict, Any , Union
+from enum import Enum
 
 class Metadata(BaseModel):
     Summary: List[str] = Field(default_factory=list, description="List of summary points about the document.")
@@ -18,4 +19,10 @@ class ChangeFormat(BaseModel):
 
 class SummaryResponse(RootModel[list[ChangeFormat]]):
     pass
-    
+
+
+class promptType(str, Enum):
+    DOCUMENT_ANALYSIS = "document_analysis"
+    DOCUMENT_COMPARISON = "document_comparison"
+    CONTEXTULIZE_QUSTION = "contextulize_question"
+    CONTEXT_QA = "context_qa"

@@ -17,3 +17,5 @@ logs/*.log
 document_analysis.db
 .pdf
 test.py
+data/document_compare/*
+single_document_chat/tests/test_documents/*

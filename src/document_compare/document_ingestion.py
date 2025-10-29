@@ -1,6 +1,9 @@
 import sys
 from pathlib import Path
 import fitz
+import uuid # data versioning
+from datetime import datetime
+import os
 
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
@@ -10,11 +13,25 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class DOcumentIngestion:
     
-    def __init__(self,base_dir:str="data\\document_compare"):
+    def __init__(self,base_dir:str="data/document_compare", session_id=None):
         
-        self.log = CustomLogger().get_logger(__name__)
-        self.base_dir = Path(base_dir)
-        self.base_dir.mkdir(parents=True , exist_ok=True)
+        try:
+            self.log = CustomLogger().get_logger(__name__)
+            self.base_dir = Path(base_dir)
+            
+            self.session_id = session_id or f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+           # self.session_path = os.path.join(self.base_dir, self.session_id)
+            self.session_path = self.base_dir / self.session_id
+            self.session_path.mkdir(parents=True, exist_ok=True)
+            
+            self.log.info("PDF Handler intialized :",session_id = self.session_id, session_path = str(self.session_path))
+           # self.session_path.(parents=True , exist_ok=True)
+            
+           
+        except Exception as e:
+            self.log.error("Error initializing DocumentHandler:", error=str(e))
+            raise DocumentPortalException("Error initializing DocumentHandler:", e) from e
+            
     
     def delete_existing_files(self):
         """Delete existing files in the upload directory."""
@@ -37,8 +54,8 @@ class DOcumentIngestion:
            # self.delete_existing_files()
             #self.log.info("Exisitng files deleted Successfully")
             
-            ref_path= self.base_dir/reference_file.name  #updated file
-            actual_path=self.base_dir/actual_file.name
+            ref_path= self.session_path / reference_file.name  #updated file
+            actual_path=self.session_path / actual_file.name
             
             if not reference_file.name.endswith(".pdf") or not actual_file.name.endswith(".pdf"):
                 raise ValueError("Only PDF's are allowed")
@@ -114,6 +131,27 @@ class DOcumentIngestion:
         except Exception as e:
             self.log.error(f"Error in Combined Documents: {e}")
             raise DocumentPortalException("Error in combining documents", sys)
-    
+
+
+    def clean_old_sessions(self , keep_latest:int=3):
+        """options to clean old sessions based on timestamp or criteria."""
+        try:
+            session_folders = sorted(
+                [f for f in self.base_dir.iterdir() if f.is_dir()], 
+                reverse=True
+                )
+            
+            for folder in session_folders[keep_latest:]:  # Keep the latest 3 sessions
+                for item in folder.iterdir():
+                    if item.is_file():
+                        item.unlink()
+                    elif item.is_dir():
+                        os.rmdir(item)
+                folder.rmdir()
+                self.log.info("Old session cleaned", session_folder=str(folder))
+            
+        except Exception as e:
+            self.log.error(f"Error cleaning old sessions: {e}")
+            raise DocumentPortalException("Error cleaning old sessions", sys)  
         
              
