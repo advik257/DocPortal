@@ -30,7 +30,7 @@ class ConversationalRAG:
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.session_id = session_id or f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-            self.retriever = retriever
+            #self.retriever = retriever
             self.llm = self._load_llm()
             self.contextuliaze_prompt = PROMPT_REGISTRY[promptType.CONTEXTULIZE_QUSTION.value]
             self.qa_prompt = PROMPT_REGISTRY[promptType.CONTEXT_QA.value]
