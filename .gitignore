@@ -20,3 +20,8 @@ test.py
 data/document_compare/*
 single_document_chat/tests/test_documents/*
 multi_doc_chat/tests/test_documents/*
+archive/*
+faiss_index/
+session_states/
+session_states/*.pkl
+session_states/*.json
