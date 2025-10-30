@@ -13,7 +13,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 
 from utils.model_loader import ModelLoader
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception_archive import DocumentPortalException
 from prompt.prompt_library import PROMPT_REGISTRY
 from model.models import *
 

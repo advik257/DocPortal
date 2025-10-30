@@ -8,7 +8,7 @@ from datetime import datetime
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception_archive import DocumentPortalException
 
 class DocumentHandler:
     

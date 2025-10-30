@@ -6,7 +6,7 @@ from langchain.output_parsers import OutputFixingParser
 from prompt.prompt_library import PROMPT_REGISTRY
 from model.models import *
 from utils.model_loader import ModelLoader
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception_archive import DocumentPortalException
 from logger.custom_logger import CustomLogger
 
 

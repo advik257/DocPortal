@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 #load_dotenv()
 from utils.config_loader import load_config
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception_archive import DocumentPortalException
 
 #from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
