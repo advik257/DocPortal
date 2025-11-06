@@ -90,11 +90,13 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
 async def compare_documents(reference: UploadFile = File(...) , actual :UploadFile = File(...)) -> Any:
     try:
         dc = DocumentComparator()
-        ref_path , actpath = dc.save_uploaded_files(FastAPIFileAdapter(reference),FastAPIFileAdapter(actual))
+        ref_path , actpath = await dc.save_uploaded_fiels(FastAPIFileAdapter(reference),FastAPIFileAdapter(actual))
         _ = ref_path , actpath
         combined_text = dc.combine_documents()
         comp = DocumentComparatorLLM()
-        return {"rows": dc.to_dict(orient="records"), "session_id": dc.session_id}
+        df = comp.compare_documents(combined_text) 
+        
+        return {"rows": df.to_dict(orient="records"), "session_id": dc.session_id}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")

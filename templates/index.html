@@ -70,7 +70,7 @@
           <div class="table-wrap">
             <table id="cmp-table">
               <thead>
-                <tr><th>Page</th><th>Changes</th></tr>
+                <tr><th>Category</th><th>Description</th></tr>
               </thead>
               <tbody>
                 <tr><td colspan="2" class="muted center">No data yet.</td></tr>
@@ -224,8 +224,8 @@
         return;
       }
       tbody.innerHTML = rows.map(r => {
-        const page = r.Page ?? r.page ?? "";
-        const chg  = r.Changes ?? r.changes ?? "";
+        const page = r.Category ?? r.Page ?? r.page ?? "";
+        const chg  = r.Description ?? r.Changes ?? r.changes ?? "";
         return `<tr><td>${page}</td><td>${chg}</td></tr>`;
       }).join("");
     } catch (e) {
