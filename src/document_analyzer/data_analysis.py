@@ -58,5 +58,4 @@ class DocumentAnalyzer:
             
         except Exception as e:
             self.log.error("Error analyzing document:", error=str(e))
-            raise DocumentPortalException("Error analyzing document:", e) from e
-    
+            raise DocumentPortalException("Error analyzing document:", e)

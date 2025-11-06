@@ -7,8 +7,23 @@ import os
 from typing import List , Optional, Dict, Any
 from pathlib import Path
 
+from src.document_ingestion.data_ingestion import DocumentHandler,DocumentComparator,ChatIngestor
+
+
+from langchain_community.vectorstores import FAISS
+from src.document_analyzer.data_analysis import DocumentAnalyzer
+from src.document_chat.retrieval import ConversationalRAG
+from src.document_compare.document_comparator import DocumentComparatorLLM
+
+FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
+UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
+FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index") 
 
 app = FastAPI(title="Document Portal API" , version="0.1")
+
+static_path = os.path.join(os.path.dirname(__file__), "..", "static")
+template_path = os.path.join(os.path.dirname(__file__), "..", "templates")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,13 +33,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# base_dir = Path(__file__).parent
-# static_dir = base_dir / "static"
-# templates_dir = base_dir / "templates"
     
-static_path = os.path.join(os.path.dirname(__file__), "..", "static")
+
 app.mount("/static", StaticFiles(directory=static_path), name="static")
-template_path = os.path.join(os.path.dirname(__file__), "..", "templates")
+
 templates = Jinja2Templates(directory=template_path)
 
 @app.get("/", response_class=HTMLResponse)
@@ -35,30 +47,114 @@ async def serve_ui(request: Request):
 async def health_check() -> Dict[str, str]:
     return {"status": "ok" ,"service": "Document-Portal"}
 
+class FastAPIFileAdapter:
+    def __init__(self, upload_file: UploadFile):
+        self.upload_file = upload_file
+        self.name = upload_file.filename
+    
+    async def getbuffer(self)-> bytes:
+        await self.upload_file.seek(0)
+        return self.upload_file.file.read()
+     
+# Move this outside the class
+def _read_pdf_via_handler(handler: DocumentHandler, path: str) -> str:
+    try:
+        if hasattr(handler, "read_pdf"):
+            return handler.read_pdf(path)
+        if hasattr(handler, "read_"):
+            return handler.read_(path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF reading failed - {str(e)}")
+        
+
+
 @app.post("/analyze/")
 async def analyze_document(file: UploadFile= File(...)) -> Any:
     try:
-        pass
+        dh = DocumentHandler()
+        save_path = await dh.save_pdf(FastAPIFileAdapter(file))
+        text = _read_pdf_via_handler(dh, save_path)
+        
+        analyzer = DocumentAnalyzer()
+        result=analyzer.analyze_document(text)
+        return JSONResponse(content=result)
+        
+    except HTTPException as he:
+        raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed - {str(e)}")
+    
+    
     
 @app.post("/compare")
 async def compare_documents(reference: UploadFile = File(...) , actual :UploadFile = File(...)) -> Any:
     try:
-        pass
+        dc = DocumentComparator()
+        ref_path , actpath = dc.save_uploaded_files(FastAPIFileAdapter(reference),FastAPIFileAdapter(actual))
+        _ = ref_path , actpath
+        combined_text = dc.combine_documents()
+        comp = DocumentComparatorLLM()
+        return {"rows": dc.to_dict(orient="records"), "session_id": dc.session_id}
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")
     
 @app.post("/chat/index")
-async def chat_build_index() -> Any:
+async def chat_build_index( files: List[UploadFile] = File(...),
+    session_id: Optional[str] = Form(None),
+    use_session_dirs: bool = Form(True),
+    chunk_size: int = Form(1000),
+    chunk_overlap: int = Form(200),
+    k: int = Form(5),
+    ) -> Any:
     try:
-        pass
+            wrapped = [FastAPIFileAdapter(f) for f in files]
+            # this is my main class for storing a data into VDB
+            # created a object of ChatIngestor
+            ci = ChatIngestor(
+                temp_base=UPLOAD_BASE,
+                faiss_base=FAISS_BASE,
+                use_session_dirs=use_session_dirs,
+                session_id=session_id or None,
+            )
+            # NOTE: ensure your ChatIngestor saves with index_name="index" or FAISS_INDEX_NAME
+            # e.g., if it calls FAISS.save_local(dir, index_name=FAISS_INDEX_NAME)
+            ci.built_retriver(  # if your method name is actually build_retriever, fix it there as well
+                wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k
+            )
+            
+            return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Indexing failed - {str(e)}")
     
 @app.post("/chat/query")
-async def chat_query() -> Any:
+async def chat_query( question: str = Form(...),
+    session_id: Optional[str] = Form(None),
+    use_session_dirs: bool = Form(True),
+    k: int = Form(5),
+    ) -> Any:
     try:
-        pass
+        
+        if use_session_dirs and not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required when use_session_dirs=True")
+
+        index_dir = os.path.join(FAISS_BASE, session_id) if use_session_dirs else FAISS_BASE  # type: ignore
+        if not os.path.isdir(index_dir):
+            raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
+
+        rag = ConversationalRAG(session_id=session_id)
+        rag.load_retriever_from_faiss(index_dir)  # build retriever + chain
+        response = rag.invoke(question, chat_history=[])
+
+        return {
+            "answer": response,
+            "session_id": session_id,
+            "k": k,
+            "engine": "LCEL-RAG"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Query failed - {str(e)}")
+    
+    
+    
+#uvicorn main:app --reload
