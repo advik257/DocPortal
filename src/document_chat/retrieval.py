@@ -5,6 +5,8 @@ from pathlib import Path
 from datetime import datetime
 from operator import itemgetter
 from typing import Optional,List
+from langchain.schema import BaseRetriever
+
 
 from logger.custom_logger import CustomLogger
 from exception.custom_exception_archive import DocumentPortalException
@@ -46,24 +48,27 @@ class ConversationalRAG:
             self.log.error("Error initializing Multi doc ConversationalRAG:", error=str(e))
             raise DocumentPortalException("Failed to initialize ConversationalRAG", sys)
         
-    
-    def load_retriever_from_faiss(self,index_path:str):
+    @staticmethod
+    def load_retriever_from_faiss(index_path:str)->BaseRetriever:
         
         """Load a FAISS vector store from disk and convert to a retriever """
+        log = CustomLogger().get_logger(__name__)
         try:
-            self.model_loader = ModelLoader().load_embeddings()
+            model_loader = ModelLoader().load_embeddings()
             if not os.path.exists(index_path):
                 raise FileNotFoundError(f"FAISS index not found at path: {index_path}")
             
-            FAISS.load_local(folder_path=index_path, embeddings=self.model_loader,allow_dangerous_deserialization=True)
-            retriever = self.vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
-            self.log.info("Retriever loaded from FAISS index successfully.", index_path=index_path)
+            vectorstore=FAISS.load_local(folder_path=index_path, 
+                                         embeddings=model_loader,
+                                         allow_dangerous_deserialization=True)
+            retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+            log.info("Retriever loaded from FAISS index successfully.", index_path=index_path)
             
             
-            return self.retriever
+            return retriever
             
         except Exception as e:
-            self.log.error("Error loading retriever from FAISS:", error=str(e))
+            log.error("Error loading retriever from FAISS:", error=str(e))
             raise DocumentPortalException("Failed to load retriever from FAISS", sys)
     
     def invoke(self, user_input:str, chat_history:Optional[list[BaseMessage]] =None)-> str:
@@ -104,7 +109,7 @@ class ConversationalRAG:
             llm = model_loader.load_llm()
             if not llm:
                 raise ValueError("LLM could not be loaded.")
-            self.log.info("LLM loaded successfully.")
+            self.log.info("LLM loaded successfully." , llm=llm)
             return llm
         except Exception as e:
             self.log.error("Error loading LLM:", error=str(e))
@@ -118,6 +123,8 @@ class ConversationalRAG:
     
     def _build_lcel_chain(self):
         """Build the LCEL chain for conversational RAG."""
+        
+
         try:
             
             # Question rewriting chain to get standalone question
@@ -150,7 +157,7 @@ class ConversationalRAG:
                 | StrOutputParser()
             )
             
-            self.log.info("LCEL chain built successfully")
+            self.log.info("LCEL chain built successfully", chain = self.chain)
             
         except Exception as e:
             self.log.error(

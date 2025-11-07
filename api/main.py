@@ -19,6 +19,10 @@ FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index") 
 
+print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
+print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
+
+
 app = FastAPI(title="Document Portal API" , version="0.1")
 
 static_path = os.path.join(os.path.dirname(__file__), "..", "static")
@@ -52,8 +56,8 @@ class FastAPIFileAdapter:
         self.upload_file = upload_file
         self.name = upload_file.filename
     
-    async def getbuffer(self)-> bytes:
-        await self.upload_file.seek(0)
+    def getbuffer(self)-> bytes:
+        self.upload_file.seek(0)
         return self.upload_file.file.read()
      
 # Move this outside the class
@@ -100,7 +104,8 @@ async def compare_documents(reference: UploadFile = File(...) , actual :UploadFi
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")
-    
+
+
 @app.post("/chat/index")
 async def chat_build_index( files: List[UploadFile] = File(...),
     session_id: Optional[str] = Form(None),
@@ -121,9 +126,8 @@ async def chat_build_index( files: List[UploadFile] = File(...),
             )
             # NOTE: ensure your ChatIngestor saves with index_name="index" or FAISS_INDEX_NAME
             # e.g., if it calls FAISS.save_local(dir, index_name=FAISS_INDEX_NAME)
-            ci.built_retriver(  # if your method name is actually build_retriever, fix it there as well
-                wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k
-            )
+            # if your method name is actually build_retriever, fix it there as well
+            ci.built_retriever( wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
             
             return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     except Exception as e:
@@ -143,9 +147,14 @@ async def chat_query( question: str = Form(...),
         index_dir = os.path.join(FAISS_BASE, session_id) if use_session_dirs else FAISS_BASE  # type: ignore
         if not os.path.isdir(index_dir):
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
+        
+         # ✅ Load retriever first using a static method or helper
+        retriever = ConversationalRAG.load_retriever_from_faiss(index_dir)
 
-        rag = ConversationalRAG(session_id=session_id)
-        rag.load_retriever_from_faiss(index_dir)  # build retriever + chain
+        # ✅ Now initialize ConversationalRAG with a valid retriever
+        rag = ConversationalRAG(session_id=session_id, retriever=retriever)
+
+        # ✅ Invoke the RAG chain
         response = rag.invoke(question, chat_history=[])
 
         return {
@@ -154,6 +163,8 @@ async def chat_query( question: str = Form(...),
             "k": k,
             "engine": "LCEL-RAG"
         }
+
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Query failed - {str(e)}")
     

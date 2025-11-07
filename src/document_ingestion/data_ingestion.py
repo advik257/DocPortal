@@ -21,7 +21,9 @@ from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
 from utils.file_io import generate_session_id,save_uploaded_files
-from utils.document_ops import load_documents , concat_for_analysis,concat_for_comparison
+from utils.document_ops import load_documents, concat_for_analysis, concat_for_comparison
+import utils.document_ops as doc_ops
+
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
@@ -29,6 +31,8 @@ class FaissManager:
   
     
     def __init__(self ,index_dir :Path , model_loader: Optional[ModelLoader] = None):
+        self.log = CustomLogger().get_logger(__name__)
+
         self.index_dir = index_dir
         self.index_dir.mkdir(parents=True, exist_ok=True)
         
@@ -82,7 +86,7 @@ class FaissManager:
             if new_docs:
                 self.vector_store.add_documents(new_docs)
                 self.vector_store.save_local(self.index_dir)
-                self._save_meta()
+                self._save_metadata()
             return len(new_docs)
             
                 
@@ -153,8 +157,8 @@ class DocumentHandler:
                 raise ValueError("Invalid file type. Only PDFs are allowed.")
             save_path = os.path.join(self.session_path, filename)
 
-            # ✅ Await the async method from FastAPIFileAdapter
-            buffer = await uploaded_file.getbuffer()
+           
+            buffer = uploaded_file.getbuffer()
 
             with open(save_path, "wb") as f:
                 f.write(buffer)
@@ -207,7 +211,7 @@ class DocumentComparator:
                     if not fobj.name.lower().endswith(".pdf"):
                         raise ValueError("Only PDF files are allowed")
                     
-                    buffer = await fobj.getbuffer()
+                    buffer = fobj.getbuffer()
                     
                     with open(out ,"wb") as f:
                         #if hasattr(fobj,"read"):
@@ -235,7 +239,7 @@ class DocumentComparator:
                 return "\n".join(parts)
             except Exception as e:
                 self.log.error("Error reading PDF", file=str(pdf_path), error=str(e))
-                raise DocumentPortalException("Error reading PDF", e) from e
+                raise DocumentPortalException("Error reading PDF", e) 
 
        def combine_documents(self) -> str:
             try:
@@ -249,7 +253,7 @@ class DocumentComparator:
                 return combined_text
             except Exception as e:
                 self.log.error("Error combining documents", error=str(e), session=self.session_id)
-                raise DocumentPortalException("Error combining documents", e) from e
+                raise DocumentPortalException("Error combining documents", e)
 
        def clean_old_sessions(self, keep_latest: int = 3):
             try:
@@ -259,12 +263,13 @@ class DocumentComparator:
                     self.log.info("Old session folder deleted", path=str(folder))
             except Exception as e:
                 self.log.error("Error cleaning old sessions", error=str(e))
-                raise DocumentPortalException("Error cleaning old sessions", e) from e
+                raise DocumentPortalException("Error cleaning old sessions", e)
 
 
 class ChatIngestor:
     
-    def __init__(self,temp_base: str = "data",faiss_base: str = "faiss_index",use_session_dirs: bool = True,session_id: Optional[str] = None):
+    def __init__(self,temp_base: Path=Path("data"),faiss_base:Path  = Path("faiss_index"),use_session_dirs: bool = True,session_id: Optional[str] = None):
+
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.model_loader = ModelLoader()
@@ -276,23 +281,25 @@ class ChatIngestor:
             self.temp_base.mkdir(parents=True , exist_ok=True)
             
             self.faiss_base = Path(faiss_base)
-            self.faiss_base = self.faiss_base.mkdir(parents=True, exist_ok=True)
+            self.faiss_base.mkdir(parents=True, exist_ok=True)
             
+
+
             self.temp_dir = self._resolve_dir(self.temp_base)
             self.faiss_dir = self._resolve_dir(self.faiss_base)
             
-            self.log.info("Chat Ingestor intialized : " , session_id= session_id , 
-                          temp_dir = str(self.temp_dir),
-                          faiss_dir = str(self.faiss_dir),
-                          sessionized = self.use_session)
+            self.log.info("Chat Ingestor intialized : " , session_id= session_id , temp_dir = str(self.temp_dir),faiss_dir = str(self.faiss_dir),sessionized = self.use_session)
             
             
         except Exception as e:
          self.log.error("Error cleaning old sessions", error=str(e))
-         raise DocumentPortalException("Error cleaning old sessions", e) from e
+         raise DocumentPortalException("Error cleaning old sessions", e) 
         
     
-    def _resolve_dir(self,base:Path):
+    def _resolve_dir(self,base:Optional[Path])->Path:
+        print("Resolving base:", base, "type:", type(base))
+        if base is None:
+            raise ValueError("Base path is None. Check FAISS_BASE initialization.")
         if self.use_session:
             d =base / self.session_id
             d.mkdir(parents=True , exist_ok=True)
@@ -306,16 +313,19 @@ class ChatIngestor:
         self.log.info("Documents split", chunks=len(chunks), chunk_size=chunk_size, overlap=chunk_overlap)
         return chunks
     
-    def built_retriever(self,
-        uploaded_files: Iterable,
-        *,
-        chunk_size: int = 1000,
-        chunk_overlap: int = 200,
-        k: int = 5,):
+    
+    
+ 
+
+
+    def built_retriever(self,uploaded_files: Iterable,*,chunk_size: int = 1000,chunk_overlap: int = 200,k: int = 5):
         try:
+       
             self.log = CustomLogger().get_logger(__name__)
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
-            docs = load_documents(paths)
+        
+    
+            docs = doc_ops.load_documents(paths)
             if not docs:
                 raise ValueError("No valid documents loaded")
             
@@ -332,14 +342,18 @@ class ChatIngestor:
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
                 
             added = fm.add_documents(chunks)
-            self.log.info("FAISS index updated", added=added, index=str(self.faiss_dir))
+            self.log.info(f"FAISS index updated: added={added}, index={self.faiss_dir}")
+            #self.log.info(f"Retriever built successfully: retriever_type=similarity, k={k}")
+
+            #self.log.info("Retriever built successfully", retriever_type="similarity", k=k)
+
             
             return vs.as_retriever(search_type="similarity", search_kwargs={"k": k})
             
             
             
         except Exception as e:
-         self.log.error("built_retriever", error=str(e))
-         raise DocumentPortalException("built_retriever", e) from e
+         self.log.error(f"built_retriever failed: {str(e)}")
+         raise DocumentPortalException(f"built_retriever failed: {e}")
     
 

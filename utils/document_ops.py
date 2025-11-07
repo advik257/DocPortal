@@ -9,9 +9,11 @@ from exception.custom_exception import DocumentPortalException
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
 
-def load_documents(self,paths: Iterable[Path]) -> List[Document]:
-    self.log = CustomLogger().get_logger(__name__)
-    
+def load_documents(paths: Iterable[Path]) -> List[Document]:
+    log = CustomLogger().get_logger(__name__)
+    print("load_documents is:", load_documents)
+    print("type of load_documents:", type(load_documents))
+
     """Load docs using appropriate loader based on extension."""
     docs: List[Document] = []
     try:
@@ -24,14 +26,14 @@ def load_documents(self,paths: Iterable[Path]) -> List[Document]:
             elif ext == ".txt":
                 loader = TextLoader(str(p), encoding="utf-8")
             else:
-                self.log.warning("Unsupported extension skipped", path=str(p))
+                log.warning("Unsupported extension skipped", path=str(p))
                 continue
             docs.extend(loader.load())
-        self.log.info("Documents loaded", count=len(docs))
+        log.info("Documents loaded", count=len(docs))
         return docs
     except Exception as e:
-        self.log.error("Failed loading documents", error=str(e))
-        raise DocumentPortalException("Error loading documents", e) from e
+        log.error("Failed loading documents", error=str(e))
+        raise DocumentPortalException("Error loading documents", e)
 
 def concat_for_analysis(docs: List[Document]) -> str:
     parts = []

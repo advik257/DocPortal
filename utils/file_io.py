@@ -19,8 +19,8 @@ def generate_session_id(prefix: str = "session") -> str:
     ist = ZoneInfo("Asia/Kolkata")
     return f"{prefix}_{datetime.now(ist).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
 
-def save_uploaded_files(self,uploaded_files: Iterable, target_dir: Path) -> List[Path]:
-    self.log= CustomLogger().get_logger(__name__)
+def save_uploaded_files(uploaded_files: Iterable, target_dir: Path) -> List[Path]:
+    log= CustomLogger().get_logger(__name__)
     """Save uploaded files (Streamlit-like) and return local paths."""
     try:
         target_dir.mkdir(parents=True, exist_ok=True)
@@ -42,8 +42,8 @@ def save_uploaded_files(self,uploaded_files: Iterable, target_dir: Path) -> List
                 else:
                     f.write(uf.getbuffer())  # fallback
             saved.append(out)
-            self.log.info("File saved for ingestion", uploaded=name, saved_as=str(out))
+            log.info("File saved for ingestion", uploaded=name, saved_as=str(out))
         return saved
     except Exception as e:
-        self.log.error("Failed to save uploaded files", error=str(e), dir=str(target_dir))
+        log.error("Failed to save uploaded files", error=str(e), dir=str(target_dir))
         raise DocumentPortalException("Failed to save uploaded files", e) from e
