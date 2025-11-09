@@ -41,7 +41,7 @@ class FaissManager:
         
         if self.metapath.exists():
             try:
-                self._meta = json.load(self.metapath.read_text(encoding='utf-8')) or {"rows":{}}
+                self._meta = json.load(self.metapath.read_text(encoding='utf-8')) or {"rows":{}} # load it if already there
             except Exception:
                 self._meta ={"rows":{}}
                 
@@ -330,6 +330,7 @@ class ChatIngestor:
                 raise ValueError("No valid documents loaded")
             
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            
             ## FAISS manager very very important class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
