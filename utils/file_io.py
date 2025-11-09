@@ -10,6 +10,8 @@ from typing import Iterable, List
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
+
+
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
 # ----------------------------- #
@@ -47,3 +49,4 @@ def save_uploaded_files(uploaded_files: Iterable, target_dir: Path) -> List[Path
     except Exception as e:
         log.error("Failed to save uploaded files", error=str(e), dir=str(target_dir))
         raise DocumentPortalException("Failed to save uploaded files", e) from e
+    
