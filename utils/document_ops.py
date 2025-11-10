@@ -6,6 +6,7 @@ from langchain.schema import Document
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
+import sys
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
 
 
@@ -33,7 +34,7 @@ def load_documents(paths: Iterable[Path]) -> List[Document]:
         return docs
     except Exception as e:
         log.error("Failed loading documents", error=str(e))
-        raise DocumentPortalException("Error loading documents", e)
+        raise DocumentPortalException("Error loading documents", exc_info=sys.exc_info())
 
 def concat_for_analysis(docs: List[Document]) -> str:
     parts = []

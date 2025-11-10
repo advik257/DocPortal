@@ -1,0 +1,45 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints
+
+# Environment and dependencies
+env/
+venv/
+.venv/
+.Python
+documentportal.egg-info
+.env
+
+# Version control
+.git/
+.gitignore
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Logs and databases
+*.log
+logs/
+*.db
+*.sqlite3
+document_analysis.db
+
+# Tests and scripts
+tests/
+test.py
+single_document_chat/tests/test_documents/*
+multi_doc_chat/tests/test_documents/*
+
+# Data and archives
+data/
+data/document_compare/*
+archive/*
+
+# Index and session state
+faiss_index/
+session_states/

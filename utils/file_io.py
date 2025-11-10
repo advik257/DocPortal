@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 import re
 import uuid
 from pathlib import Path
@@ -46,4 +47,4 @@ def save_uploaded_files(uploaded_files: Iterable, target_dir: Path) -> List[Path
         return saved
     except Exception as e:
         log.error("Failed to save uploaded files", error=str(e), dir=str(target_dir))
-        raise DocumentPortalException("Failed to save uploaded files", e) from e
+        raise DocumentPortalException("Failed to save uploaded files", exc_info=sys.exc_info())

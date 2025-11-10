@@ -8,6 +8,7 @@ from typing import List , Optional, Dict, Any
 from pathlib import Path
 
 from src.document_ingestion.data_ingestion import DocumentHandler,DocumentComparator,ChatIngestor
+from utils.document_ops import FastAPIFileAdapter,read_pdf_via_handler
 
 
 from langchain_community.vectorstores import FAISS
@@ -19,8 +20,8 @@ FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index") 
 
-print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
-print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
+# print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
+# print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
 
 
 app = FastAPI(title="Document Portal API" , version="0.1")
@@ -51,33 +52,13 @@ async def serve_ui(request: Request):
 async def health_check() -> Dict[str, str]:
     return {"status": "ok" ,"service": "Document-Portal"}
 
-class FastAPIFileAdapter:
-    def __init__(self, upload_file: UploadFile):
-        self.upload_file = upload_file
-        self.name = upload_file.filename
-    
-    def getbuffer(self)-> bytes:
-        self.upload_file.seek(0)
-        return self.upload_file.file.read()
-     
-# Move this outside the class
-def _read_pdf_via_handler(handler: DocumentHandler, path: str) -> str:
-    try:
-        if hasattr(handler, "read_pdf"):
-            return handler.read_pdf(path)
-        if hasattr(handler, "read_"):
-            return handler.read_(path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF reading failed - {str(e)}")
-        
-
-
+#-------------------Analyzing Document-------------------------------------
 @app.post("/analyze/")
 async def analyze_document(file: UploadFile= File(...)) -> Any:
     try:
         dh = DocumentHandler()
         save_path = await dh.save_pdf(FastAPIFileAdapter(file))
-        text = _read_pdf_via_handler(dh, save_path)
+        text = read_pdf_via_handler(dh, save_path)
         
         analyzer = DocumentAnalyzer()
         result=analyzer.analyze_document(text)
@@ -87,8 +68,8 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed - {str(e)}")
-    
-    
+
+#-------------------Compare Document-------------------------------------------------------------
     
 @app.post("/compare")
 async def compare_documents(reference: UploadFile = File(...) , actual :UploadFile = File(...)) -> Any:
@@ -105,7 +86,7 @@ async def compare_documents(reference: UploadFile = File(...) , actual :UploadFi
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")
 
-
+#-------------------Chat Document-------------------------------------------------------------
 @app.post("/chat/index")
 async def chat_build_index( files: List[UploadFile] = File(...),
     session_id: Optional[str] = Form(None),
@@ -132,6 +113,8 @@ async def chat_build_index( files: List[UploadFile] = File(...),
             return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Indexing failed - {str(e)}")
+    
+#-------------------Query Document-------------------------------------------------------------
     
 @app.post("/chat/query")
 async def chat_query( question: str = Form(...),
@@ -172,3 +155,6 @@ async def chat_query( question: str = Form(...),
     
 #uvicorn main:app --reload
 #uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+#uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+#http://127.0.0.1:8080/
+#http://localhost:8080/

@@ -46,7 +46,7 @@ class ConversationalRAG:
             
         except Exception as e:
             self.log.error("Error initializing Multi doc ConversationalRAG:", error=str(e))
-            raise DocumentPortalException("Failed to initialize ConversationalRAG", sys)
+            raise DocumentPortalException("Failed to initialize ConversationalRAG", exc_info=sys.exc_info())
         
     @staticmethod
     def load_retriever_from_faiss(index_path:str)->BaseRetriever:
@@ -69,7 +69,7 @@ class ConversationalRAG:
             
         except Exception as e:
             log.error("Error loading retriever from FAISS:", error=str(e))
-            raise DocumentPortalException("Failed to load retriever from FAISS", sys)
+            raise DocumentPortalException("Failed to load retriever from FAISS", exc_info=sys.exc_info())
     
     def invoke(self, user_input:str, chat_history:Optional[list[BaseMessage]] =None)-> str:
         
@@ -100,7 +100,7 @@ class ConversationalRAG:
         
         except Exception as e:
             self.log.error("Error invoking ConversationalRAG:", error=str(e))
-            raise DocumentPortalException("Failed to invoke ConversationalRAG", sys)
+            raise DocumentPortalException("Failed to invoke ConversationalRAG", exc_info=sys.exc_info())
     
     def _load_llm(self):
         """Load the language model for generating responses."""
@@ -113,7 +113,7 @@ class ConversationalRAG:
             return llm
         except Exception as e:
             self.log.error("Error loading LLM:", error=str(e))
-            raise DocumentPortalException("Failed to load LLM", sys)
+            raise DocumentPortalException("Failed to load LLM", exc_info=sys.exc_info())
     
     @staticmethod
     def _format_docs(docs):
@@ -165,5 +165,5 @@ class ConversationalRAG:
                 error=str(e),
                 error_type=type(e).__name__
             )
-            raise DocumentPortalException("Failed to build LCEL chain", sys)
+            raise DocumentPortalException("Failed to build LCEL chain", exc_info=sys.exc_info())
     
