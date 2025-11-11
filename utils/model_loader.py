@@ -47,7 +47,7 @@ class ModelLoader:
         
         except Exception as e:
             log.error("Error loading embeddings model:", error = str(e))
-            raise DocumentPortalException("Failed to Load Embedding model", exc_info=sys.exc_info())
+            raise DocumentPortalException("Failed to Load Embedding model",sys)
         
     
     def load_llm(self):

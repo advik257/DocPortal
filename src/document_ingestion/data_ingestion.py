@@ -117,7 +117,7 @@ class FaissManager:
 
             # Create new index if texts provided
             if not texts:
-                raise DocumentPortalException("No existing FAISS index and no data to create one", exc_info=sys.exc_info())
+                raise DocumentPortalException("No existing FAISS index and no data to create one", sys)
 
             # Create new vector store
             self.vector_store = FAISS.from_texts(
@@ -134,7 +134,7 @@ class FaissManager:
 
         except Exception as e:
             self.log.error("Error in load_or_create", error=str(e))
-            raise DocumentPortalException("Failed to load or create FAISS index", exc_info=sys.exc_info())
+            raise DocumentPortalException("Failed to load or create FAISS index",sys)
    
 
 class DocumentHandler:
@@ -167,7 +167,7 @@ class DocumentHandler:
             return save_path
         except Exception as e:
             self.log.error("Failed to save PDF", error=str(e), session_id=self.session_id)
-            raise DocumentPortalException(f"Failed to save PDF: {str(e)}") 
+            raise DocumentPortalException(f"Failed to save PDF:",sys) 
 
 
 
@@ -184,7 +184,7 @@ class DocumentHandler:
             return text
         except Exception as e:
             self.log.error("Failed to read PDF", error=str(e), pdf_path=pdf_path, session_id=self.session_id)
-            raise DocumentPortalException(f"Could not process PDF: {pdf_path}", exc_info=sys.exc_info())
+            raise DocumentPortalException(f"Could not process PDF: {pdf_path}", sys)
     
 
 class DocumentComparator:
@@ -222,7 +222,7 @@ class DocumentComparator:
                 return ref_path,act_path
            except Exception as e:
                 self.log.error("save_uploaded_fiels", error=str(e), reference=str(ref_path), actual=str(act_path), session=self.session_id)
-                raise DocumentPortalException(f"save_uploaded_fiels could not compare :", exc_info=sys.exc_info())
+                raise DocumentPortalException(f"save_uploaded_fiels could not compare :",sys)
          
        def read_pdf(self, pdf_path: Path) -> str:
             try:
@@ -239,7 +239,7 @@ class DocumentComparator:
                 return "\n".join(parts)
             except Exception as e:
                 self.log.error("Error reading PDF", file=str(pdf_path), error=str(e))
-                raise DocumentPortalException("Error reading PDF", exc_info=sys.exc_info()) 
+                raise DocumentPortalException("Error reading PDF", sys) 
 
        def combine_documents(self) -> str:
             try:
@@ -253,7 +253,7 @@ class DocumentComparator:
                 return combined_text
             except Exception as e:
                 self.log.error("Error combining documents", error=str(e), session=self.session_id)
-                raise DocumentPortalException("Error combining documents", exc_info=sys.exc_info())
+                raise DocumentPortalException("Error combining documents", sys)
 
        def clean_old_sessions(self, keep_latest: int = 3):
             try:
@@ -263,7 +263,7 @@ class DocumentComparator:
                     self.log.info("Old session folder deleted", path=str(folder))
             except Exception as e:
                 self.log.error("Error cleaning old sessions", error=str(e))
-                raise DocumentPortalException("Error cleaning old sessions", exc_info=sys.exc_info())
+                raise DocumentPortalException("Error cleaning old sessions",sys)
 
 
 class ChatIngestor:
@@ -293,7 +293,7 @@ class ChatIngestor:
             
         except Exception as e:
          self.log.error("Error cleaning old sessions", error=str(e))
-         raise DocumentPortalException("Error cleaning old sessions", exc_info=sys.exc_info()) 
+         raise DocumentPortalException("Error cleaning old sessions", sys) 
         
     
     def _resolve_dir(self,base:Optional[Path])->Path:
@@ -355,6 +355,6 @@ class ChatIngestor:
             
         except Exception as e:
          self.log.error(f"built_retriever failed: {str(e)}")
-         raise DocumentPortalException(f"built_retriever failed: {e}")
+         raise DocumentPortalException(f"built_retriever failed :" ,e)
     
 

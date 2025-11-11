@@ -34,7 +34,7 @@ class DocumentAnalyzer:
             
         except Exception as e:
             self.log.error("Error initializing DocumentAnalyzer:", error=str(e))
-            raise DocumentPortalException("Error initializing DocumentAnalyzer:", exc_info=sys.exc_info())
+            raise DocumentPortalException("Error initializing DocumentAnalyzer:", sys)
         
     
     def analyze_document(self, document_text: str) -> dict:
@@ -58,4 +58,4 @@ class DocumentAnalyzer:
             
         except Exception as e:
             self.log.error("Error analyzing document:", error=str(e))
-            raise DocumentPortalException("Error analyzing document:", exc_info=sys.exc_info())
+            raise DocumentPortalException("Error analyzing document:", sys)
