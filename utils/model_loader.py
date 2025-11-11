@@ -33,7 +33,7 @@ class ModelLoader:
         missing = [key for key, value in self.api_keys.items() if not value]
         if missing:
             log.error(f"Missing required environment variables: {missing}")
-            raise DocumentPortalException(f"Missing required environment variables: {missing}", sys)
+            raise DocumentPortalException(f"Missing required environment variables: {missing}")
         log.info("Environment variables validated successfully.", available_keys=[key for key in self.api_keys if self.api_keys[key]])
         
     def load_embeddings(self):
