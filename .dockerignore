@@ -6,12 +6,10 @@ __pycache__/
 .ipynb_checkpoints
 
 # Environment and dependencies
-env/
 venv/
 .venv/
 .Python
 documentportal.egg-info
-.env
 
 # Version control
 .git/
