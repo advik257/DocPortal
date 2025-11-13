@@ -25,4 +25,9 @@ faiss_index/
 session_states/
 session_states/*.pkl
 session_states/*.json
+<<<<<<< HEAD
 session*/
+=======
+faiss_index/
+data/
+>>>>>>> dev

@@ -69,7 +69,7 @@ class ConversationalRAG:
             
         except Exception as e:
             log.error("Error loading retriever from FAISS:", error=str(e))
-            raise DocumentPortalException("Failed to load retriever from FAISS", sys)
+            raise DocumentPortalException("Failed to load retriever from FAISS",sys)
     
     def invoke(self, user_input:str, chat_history:Optional[list[BaseMessage]] =None)-> str:
         
@@ -113,7 +113,7 @@ class ConversationalRAG:
             return llm
         except Exception as e:
             self.log.error("Error loading LLM:", error=str(e))
-            raise DocumentPortalException("Failed to load LLM", sys)
+            raise DocumentPortalException("Failed to load LLM",sys)
     
     @staticmethod
     def _format_docs(docs):

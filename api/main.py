@@ -20,8 +20,13 @@ FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index") 
 
+<<<<<<< HEAD
 #print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
 #print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
+=======
+# print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
+# print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
+>>>>>>> dev
 
 
 app = FastAPI(title="Document Portal API" , version="0.1")
@@ -54,8 +59,13 @@ async def serve_ui(request: Request):
 @app.get("/health")
 async def health_check() -> Dict[str, str]:
     return {"status": "ok" ,"service": "Document-Portal"}
+<<<<<<< HEAD
         
 # ----------------------Document Analysis------------------------------------------
+=======
+
+#-------------------Analyzing Document-------------------------------------
+>>>>>>> dev
 @app.post("/analyze/")
 async def analyze_document(file: UploadFile= File(...)) -> Any:
     try:
@@ -71,9 +81,15 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed - {str(e)}")
+<<<<<<< HEAD
     
     
 # ---------------------Document Compare ----------------------------------------------------------------
+=======
+
+#-------------------Compare Document-------------------------------------------------------------
+    
+>>>>>>> dev
 @app.post("/compare")
 async def compare_documents(reference: UploadFile = File(...) , actual :UploadFile = File(...)) -> Any:
     try:
@@ -89,8 +105,12 @@ async def compare_documents(reference: UploadFile = File(...) , actual :UploadFi
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")
 
+<<<<<<< HEAD
 #------------------------create Document Index ---------------------------------------------------------
 
+=======
+#-------------------Chat Document-------------------------------------------------------------
+>>>>>>> dev
 @app.post("/chat/index")
 async def chat_build_index( files: List[UploadFile] = File(...),
     session_id: Optional[str] = Form(None),
@@ -118,8 +138,12 @@ async def chat_build_index( files: List[UploadFile] = File(...),
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Indexing failed - {str(e)}")
     
+<<<<<<< HEAD
     
 # --------------------Document Chat ---------------------------------------------------------------
+=======
+#-------------------Query Document-------------------------------------------------------------
+>>>>>>> dev
     
 @app.post("/chat/query")
 async def chat_query( question: str = Form(...),
@@ -159,3 +183,7 @@ async def chat_query( question: str = Form(...),
     
     
 #uvicorn main:app --reload
+#uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+#uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+#http://127.0.0.1:8080/
+#http://localhost:8080/
