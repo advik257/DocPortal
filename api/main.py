@@ -50,13 +50,8 @@ async def serve_ui(request: Request):
 @app.get("/health")
 async def health_check() -> Dict[str, str]:
     return {"status": "ok" ,"service": "Document-Portal"}
-<<<<<<< HEAD
         
 # ----------------------Document Analysis------------------------------------------
-=======
-
-#-------------------Analyzing Document-------------------------------------
->>>>>>> dev
 @app.post("/analyze/")
 async def analyze_document(file: UploadFile= File(...)) -> Any:
     try:
@@ -72,15 +67,9 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
         raise he
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis failed - {str(e)}")
-<<<<<<< HEAD
     
     
 # ---------------------Document Compare ----------------------------------------------------------------
-=======
-
-#-------------------Compare Document-------------------------------------------------------------
-    
->>>>>>> dev
 @app.post("/compare")
 async def compare_documents(reference: UploadFile = File(...) , actual :UploadFile = File(...)) -> Any:
     try:
@@ -96,12 +85,8 @@ async def compare_documents(reference: UploadFile = File(...) , actual :UploadFi
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed - {str(e)}")
 
-<<<<<<< HEAD
 #------------------------create Document Index ---------------------------------------------------------
 
-=======
-#-------------------Chat Document-------------------------------------------------------------
->>>>>>> dev
 @app.post("/chat/index")
 async def chat_build_index( files: List[UploadFile] = File(...),
     session_id: Optional[str] = Form(None),
@@ -129,12 +114,8 @@ async def chat_build_index( files: List[UploadFile] = File(...),
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Indexing failed - {str(e)}")
     
-<<<<<<< HEAD
     
 # --------------------Document Chat ---------------------------------------------------------------
-=======
-#-------------------Query Document-------------------------------------------------------------
->>>>>>> dev
     
 @app.post("/chat/query")
 async def chat_query( question: str = Form(...),
