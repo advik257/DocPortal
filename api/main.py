@@ -20,15 +20,6 @@ FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_INDEX_NAME = os.getenv("FAISS_INDEX_NAME", "index") 
 
-<<<<<<< HEAD
-#print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
-#print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
-=======
-# print("UPLOAD_BASE:", UPLOAD_BASE, type(UPLOAD_BASE))
-# print("FAISS_BASE:", FAISS_BASE, type(FAISS_BASE))
->>>>>>> dev
-
-
 app = FastAPI(title="Document Portal API" , version="0.1")
 
 static_path = os.path.join(os.path.dirname(__file__), "..", "static")
