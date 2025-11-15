@@ -132,13 +132,13 @@ async def chat_query( question: str = Form(...),
         if not os.path.isdir(index_dir):
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
         
-         # ✅ Load retriever first using a static method or helper
+         # Load retriever first using a static method or helper
         retriever = ConversationalRAG.load_retriever_from_faiss(index_dir)
 
-        # ✅ Now initialize ConversationalRAG with a valid retriever
+        # Now initialize ConversationalRAG with a valid retriever
         rag = ConversationalRAG(session_id=session_id, retriever=retriever)
 
-        # ✅ Invoke the RAG chain
+        # Invoke the RAG chain
         response = rag.invoke(question, chat_history=[])
 
         return {
