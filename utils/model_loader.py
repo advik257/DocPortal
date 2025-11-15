@@ -19,7 +19,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 log = CustomLogger().get_logger(__file__)
 
 class ApiKeyManager:
-    REQUIRED_KEYS = ["GROQ_API_KEY", "GOOGLE_API_KEY"]
+    REQUIRED_KEYS = ["GROQ_API_KEY", "GEMINI_API_KEY"]
 
     def __init__(self):
         self.api_keys = {}
@@ -134,7 +134,7 @@ class ModelLoader:
          elif provider == "gemini":
              llm = ChatGoogleGenerativeAI(
                  model=model_name,
-                 #api_key=self.api_keys["GEMINI_API_KEY"],
+                 api_key=self.api_key_mgr.get("GEMINI_API_KEY"),
                  temperature=temperature,
                  max_tokens=max_tokens
              )
