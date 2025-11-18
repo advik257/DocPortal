@@ -19,7 +19,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 log = CustomLogger().get_logger(__file__)
 
 class ApiKeyManager:
-    REQUIRED_KEYS = ["GROQ_API_KEY", "GEMINI_API_KEY"]
+    REQUIRED_KEYS = ["GROQ_API_KEY"]
 
     def __init__(self):
         self.api_keys = {}
@@ -65,6 +65,7 @@ class ModelLoader:
     """Class to load and manage models and embeddings."""
     
     def __init__(self):
+        
         if os.getenv("ENV", "local").lower() != "production":
             load_dotenv()
             log.info("Running in LOCAL mode: .env loaded")
@@ -131,14 +132,14 @@ class ModelLoader:
              
              return llm
          
-         elif provider == "gemini":
-             llm = ChatGoogleGenerativeAI(
-                 model=model_name,
-                 api_key=self.api_key_mgr.get("GEMINI_API_KEY"),
-                 temperature=temperature,
-                 max_tokens=max_tokens
-             )
-             return llm
+        #  elif provider == "gemini":
+        #      llm = ChatGoogleGenerativeAI(
+        #          model=model_name,
+        #          api_key=self.api_key_mgr.get("GEMINI_API_KEY"),
+        #          temperature=temperature,
+        #          max_tokens=max_tokens
+        #      )
+        #      return llm
          
          else :
              log.error(f"Unsupported provider: {provider}")
