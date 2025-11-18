@@ -28,7 +28,7 @@
       ],
       "secrets": [
         {
-          "name": "GROQ_API_KEY",
+          "name": "API_KEYS",
           "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:018252911486:secret:apikeydocportal-rulDfU"
         }
         
