@@ -97,17 +97,14 @@ async def chat_build_index( files: List[UploadFile] = File(...),
     ) -> Any:
     try:
             wrapped = [FastAPIFileAdapter(f) for f in files]
-            # this is my main class for storing a data into VDB
-            # created a object of ChatIngestor
+            
             ci = ChatIngestor(
                 temp_base=UPLOAD_BASE,
                 faiss_base=FAISS_BASE,
                 use_session_dirs=use_session_dirs,
                 session_id=session_id or None,
             )
-            # NOTE: ensure your ChatIngestor saves with index_name="index" or FAISS_INDEX_NAME
-            # e.g., if it calls FAISS.save_local(dir, index_name=FAISS_INDEX_NAME)
-            # if your method name is actually build_retriever, fix it there as well
+            
             ci.built_retriever( wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
             
             return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
@@ -132,10 +129,10 @@ async def chat_query( question: str = Form(...),
         if not os.path.isdir(index_dir):
             raise HTTPException(status_code=404, detail=f"FAISS index not found at: {index_dir}")
         
-         # Load retriever first using a static method or helper
+        
         retriever = ConversationalRAG.load_retriever_from_faiss(index_dir)
 
-        # Now initialize ConversationalRAG with a valid retriever
+       
         rag = ConversationalRAG(session_id=session_id, retriever=retriever)
 
         # Invoke the RAG chain

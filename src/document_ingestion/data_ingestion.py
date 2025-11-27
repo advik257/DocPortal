@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple, Union,Iterable
 import pandas as pd
+import time
 
 import fitz  # PyMuPDF
 from langchain.schema import Document
@@ -35,7 +36,6 @@ class FaissManager:
 
         self.index_dir = index_dir
         self.index_dir.mkdir(parents=True, exist_ok=True)
-        
         self.metapath = self.index_dir / "ingested_meta.json"
         self._meta : Dict[str , Any] = {"rows":{}}
         
@@ -122,7 +122,7 @@ class FaissManager:
             # Create new vector store
             self.vector_store = FAISS.from_texts(
                 texts=texts,
-                embedding=self.embedding_model,  # Changed from self.emb
+                embedding=self.embedding_model, 
                 metadatas=metadatas or []
             )
             
@@ -331,7 +331,7 @@ class ChatIngestor:
             
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             
-            ## FAISS manager very very important class for the docchat
+            ## FAISS manager class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
             texts = [c.page_content for c in chunks]
@@ -340,6 +340,8 @@ class ChatIngestor:
             try:
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
             except Exception:
+                self.log.info(f"Retrying after error load_or_create method : {e}")
+                time.sleep(1)
                 vs = fm.load_or_create(texts=texts, metadatas=metas)
                 
             added = fm.add_documents(chunks)
