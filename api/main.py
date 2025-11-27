@@ -151,7 +151,7 @@ async def chat_query( question: str = Form(...),
     
     
     
-#uvicorn main:app --reload
+
 #uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 #uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
 #http://127.0.0.1:8080/
