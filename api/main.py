@@ -60,7 +60,7 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
         save_path = await dh.save_pdf(FastAPIFileAdapter(file))
         
         file_name = os.path.basename(save_path)
-        s3_key = f"uploads/analyze/{file_name}"
+        s3_key = f"uploads/analyze/{dh.session_id}/{file_name}"
         s3_uri = upload_to_s3(save_path, s3_key)
         
         text = read_pdf_via_handler(dh, save_path)
@@ -123,7 +123,7 @@ async def chat_build_index( files: List[UploadFile] = File(...),
                 use_session_dirs=use_session_dirs,
                 session_id=session_id or None,
             )
-            
+             # Save files into session temp_dir
             
             ci.built_retriever( wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
             

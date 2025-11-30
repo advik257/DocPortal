@@ -1,8 +1,11 @@
 import boto3
 import os
 
+
+
 # Get bucket name from environment or hardcode
 S3_BUCKET = os.getenv("S3_BUCKET", "documentportal-storage")
+print(boto3.session.Session().get_credentials())
 
 s3 = boto3.client("s3")
 

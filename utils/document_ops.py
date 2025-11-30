@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 from fastapi import UploadFile
 from langchain.schema import Document
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
@@ -54,9 +54,18 @@ class FastAPIFileAdapter:
     def __init__(self, uf: UploadFile):
         self._uf = uf
         self.name = uf.filename
+        self.filepath: Optional[str] = None        
+        
     def getbuffer(self) -> bytes:
         self._uf.file.seek(0)
         return self._uf.file.read()
+    
+    def save_to(self, path: str) -> str:
+        with open(path, "wb") as f:
+            f.write(self.getbuffer())
+        self.filepath = path
+        return path
+
 
 def read_pdf_via_handler(handler, path: str) -> str:
     if hasattr(handler, "read_pdf"):

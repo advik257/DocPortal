@@ -324,7 +324,6 @@ class ChatIngestor:
             self.log = CustomLogger().get_logger(__name__)
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
         
-    
             docs = doc_ops.load_documents(paths)
             if not docs:
                 raise ValueError("No valid documents loaded")

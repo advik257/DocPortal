@@ -100,32 +100,32 @@ class DocumentComparatorLLM:
                     "Description": comparison_result.title
                 })
             
-            # Add similarities
-            for item in comparison_result.similarities:
-                records.append({
-                    "Category": "Similarities",
-                    "Description": item
-                })
+            # # Add similarities
+            # for item in comparison_result.similarities:
+            #     records.append({
+            #         "Category": "Similarities",
+            #         "Description": item
+            #     })
             
-            # Add differences
-            for item in comparison_result.differences:
-                records.append({
-                    "Category": "Differences",
-                    "Description": item
-                })
+            # # Add differences
+            # for item in comparison_result.differences:
+            #     records.append({
+            #         "Category": "Differences",
+            #         "Description": item
+            #     })
             
-            # Add document summaries
-            for i, summary in enumerate(comparison_result.document1_summary, 1):
-                records.append({
-                    "Category": "Document 1 Summary",
-                    "Description": f"{i}. {summary}"
-                })
+            # # Add document summaries
+            # for i, summary in enumerate(comparison_result.document1_summary, 1):
+            #     records.append({
+            #         "Category": "Document 1 Summary",
+            #         "Description": f"{i}. {summary}"
+            #     })
             
-            for i, summary in enumerate(comparison_result.document2_summary, 1):
-                records.append({
-                    "Category": "Document 2 Summary",
-                    "Description": f"{i}. {summary}"
-                })
+            # for i, summary in enumerate(comparison_result.document2_summary, 1):
+            #     records.append({
+            #         "Category": "Document 2 Summary",
+            #         "Description": f"{i}. {summary}"
+            #     })
             
             # Add unique information
             for doc, items in comparison_result.unique_information.items():
@@ -138,6 +138,7 @@ class DocumentComparatorLLM:
             df = pd.DataFrame(records)
             self.log.info("Response formatted into DataFrame", row_count=len(df))
             return df
+        
             
         except Exception as e:
             self.log.error(f"Error formatting comparison response: {str(e)}")
