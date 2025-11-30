@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 import os
 from typing import List , Optional, Dict, Any
 from pathlib import Path
+from utils.s3_uploader import upload_to_s3
 
 from src.document_ingestion.data_ingestion import DocumentHandler,DocumentComparator,ChatIngestor
 from utils.document_ops import FastAPIFileAdapter,read_pdf_via_handler
@@ -57,10 +58,17 @@ async def analyze_document(file: UploadFile= File(...)) -> Any:
     try:
         dh = DocumentHandler()
         save_path = await dh.save_pdf(FastAPIFileAdapter(file))
+        
+        file_name = os.path.basename(save_path)
+        s3_key = f"uploads/analyze/{file_name}"
+        s3_uri = upload_to_s3(save_path, s3_key)
+        
         text = read_pdf_via_handler(dh, save_path)
         
         analyzer = DocumentAnalyzer()
         result=analyzer.analyze_document(text)
+        result["s3_uri"] = s3_uri
+        
         return JSONResponse(content=result)
         
     except HTTPException as he:
@@ -76,6 +84,17 @@ async def compare_documents(reference: UploadFile = File(...) , actual :UploadFi
         dc = DocumentComparator()
         ref_path , actpath = await dc.save_uploaded_fiels(FastAPIFileAdapter(reference),FastAPIFileAdapter(actual))
         _ = ref_path , actpath
+        
+        ref_filename = os.path.basename(ref_path)
+        act_filename = os.path.basename(actpath)
+        
+        s3_key_ref = f"uploads/compare/{dc.session_id}/reference.pdf"
+        s3_key_act = f"uploads/compare/{dc.session_id}/actual.pdf"
+
+        upload_to_s3(ref_path, s3_key_ref)
+        upload_to_s3(actpath, s3_key_act)
+
+        
         combined_text = dc.combine_documents()
         comp = DocumentComparatorLLM()
         df = comp.compare_documents(combined_text) 
@@ -105,9 +124,20 @@ async def chat_build_index( files: List[UploadFile] = File(...),
                 session_id=session_id or None,
             )
             
+            
             ci.built_retriever( wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
             
-            return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
+            s3_uploaded = []
+            
+            for w in wrapped:
+                local_path = w.filepath                          # path created by ChatIngestor
+                filename = os.path.basename(local_path)
+                s3_key = f"uploads/chat/{ci.session_id}/{filename}"
+
+                s3_url = upload_to_s3(local_path, s3_key)
+                s3_uploaded.append(s3_url)
+            
+            return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs,"uploaded_to_s3": s3_uploaded}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Indexing failed - {str(e)}")
     

@@ -2,6 +2,7 @@
   "family": "documentportaltd",
   "networkMode": "awsvpc",
   "executionRoleArn": "arn:aws:iam::018252911486:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::018252911486:role/ecsTaskS3AccessRole",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "1024",
   "memory": "8192",
@@ -24,6 +25,14 @@
         {
           "name": "ENV",
           "value": "production"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "ap-southeast-2"
+        },
+        {
+          "name": "S3_BUCKET",
+          "value": "documentportal-storage"
         }
       ],
       "secrets": [
@@ -31,7 +40,6 @@
           "name": "API_KEYS",
           "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:018252911486:secret:apikeydocportal-rulDfU"
         }
-        
       ],
       "logConfiguration": {
         "logDriver": "awslogs",

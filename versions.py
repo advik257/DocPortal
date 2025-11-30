@@ -23,7 +23,8 @@ packages = [
     "langchain-huggingface",
     "transformers",
     "pyyaml",
-    "pandas"
+    "pandas",
+    "boto3"
 ]
 for pkg in packages:
     try:
